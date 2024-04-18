@@ -21,6 +21,7 @@ function [save_fn] = A_ProcessTimeSeries(filelist,register_flag,nonrigid_flag,mo
 % nonrigid_flag: Whether to warp seperate files together using nonrigid
 % registration. Use for aligning corresponding recordings from different
 % sessions. Note: Computer Vision Systems toolbox required for this step.
+% ('Yes' or 'No')
 %
 % movie_flag: (0,1) Whether to save an avi movie file of time series
 %
@@ -112,12 +113,14 @@ for i = 1:lengthList
                 index = strfind(cfg_line,'repetitionPeriod');
                 data.frameRate = 1/sscanf(cfg_line(index:end),'repetitionPeriod="%f"');
                 if isinf(data.frameRate)
-                    data.frameRate = input('Enter frame rate (Hz): ');
+                    % data.frameRate = input('Enter frame rate (Hz): ');
+                    data.frameRate = 20;
                 end
             end
         end
     else
-        data.frameRate = input('Enter frame rate (Hz): ');
+        % data.frameRate = input('Enter frame rate (Hz): ');
+        data.frameRate = 20;
     end
     
     %% Perform X-Y Registration (movement correction)
@@ -250,9 +253,16 @@ for i = 1:lengthList
     end
     
     %% save
-    save_fn = strcat(data.filename(1:end-4), '_data.mat');
+    if isstring(data.filename)
+        usename = char(data.filename);
+    elseif ischar(data.filename)
+        usename = data.filename;
+    end
+    save_fn = strcat(usename(1:end-4), '_data.mat');
     % save(strcat(data.filename(1:end-4), '_data', 'data')
     % eval(['save ' data.filename(1:end-4) '_data data']);
+    display(save_fn);
+    
     save(save_fn, 'data');
     clear data
 end
@@ -281,7 +291,9 @@ if lengthList > 1
             load([filename(1:end-4) '_data.mat']);
             data.activity_map = mean_activity_map;
             data.avg_projection = mean_avg_projection;
-            save([filename(1:end-4) '_data.mat'],'data')
+            if mustBeTextScalar([filename(1:end-4) '_data.mat'])
+                save([filename(1:end-4) '_data.mat'], 'data')
+            end
         end
     elseif strcmp(nonrigid_flag,'Yes')
         %%initialize master file data

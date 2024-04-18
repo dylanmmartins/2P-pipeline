@@ -4,8 +4,9 @@ folder_list = {'AlternatingDriftingGratingsRandom-002',...
 
 for i = 1:length(folder_list)
     cd(folder_list{i})
-    firstfile = [folder_list{i} '_Cycle00001_Ch2_000001.ome.tif'];
-    subroutine_tifConvert(firstfile)
+    f1 = split(folder_list{i}, '\\');
+    firstfile = strcat(string(f1(4)), '_', string(f1(5)), '_Ch2_000001.ome.tif');
+    subroutine_tifConvert(char(firstfile));
     cd ..
 end
 
